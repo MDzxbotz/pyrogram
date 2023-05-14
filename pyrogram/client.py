@@ -44,7 +44,7 @@ from pyrogram.errors import CDNFileHashMismatch
 from pyrogram.errors import (
     SessionPasswordNeeded,
     VolumeLocNotFound, ChannelPrivate,
-    BadRequest
+    BadRequest, FileReferenceExpired
 )
 from pyrogram.handlers.handler import Handler
 from pyrogram.methods import Methods
@@ -1016,9 +1016,11 @@ class Client(Methods):
                     finally:
                         await cdn_session.stop()
             except pyrogram.StopTransmission:
-                raise
+                raise 
+            except FileReferenceExpired:
+                raise 
             except Exception as e:
-                log.exception(e)
+                log.warning(e)
             finally:
                 await session.stop()
 
