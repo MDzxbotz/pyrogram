@@ -139,7 +139,10 @@ class DownloadMedia:
             file_id_str = media.file_id
 
         file_id_obj = FileId.decode(file_id_str)
-
+        
+        if file_id_obj.dc_id != self.me.dc_id:
+           return None 
+    
         file_type = file_id_obj.file_type
         media_file_name = getattr(media, "file_name", "")
         file_size = getattr(media, "file_size", 0)
