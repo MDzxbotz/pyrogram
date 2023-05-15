@@ -140,7 +140,7 @@ class DownloadMedia:
 
         file_id_obj = FileId.decode(file_id_str)
         
-        if file_id_obj.dc_id != self.me.dc_id:
+        if file_id_obj.dc_id != await self.storage.dc_id():
            return None 
     
         file_type = file_id_obj.file_type
