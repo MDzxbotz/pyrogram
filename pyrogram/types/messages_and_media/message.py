@@ -2753,7 +2753,7 @@ class Message(Object, Update):
     async def edit_text(
         self,
         text: str,
-        photo: str,
+        photo: str = None,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: List["types.MessageEntity"] = None,
         disable_web_page_preview: bool = None,
