@@ -30,6 +30,7 @@ class EditMessageText:
         chat_id: Union[int, str],
         message_id: int,
         text: str,
+        photo: str = None,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: List["types.MessageEntity"] = None,
         disable_web_page_preview: bool = None,
@@ -78,11 +79,19 @@ class EditMessageText:
                     chat_id, message_id, message.text,
                     disable_web_page_preview=True)
         """
-
+        
+        media = None 
+        
+        if photo is not None:
+           media = raw.types.InputMediaPhotoExternal(
+              url=photo
+           )
+            
         r = await self.invoke(
             raw.functions.messages.EditMessage(
                 peer=await self.resolve_peer(chat_id),
                 id=message_id,
+                media=media,
                 no_webpage=disable_web_page_preview or None,
                 reply_markup=await reply_markup.write(self) if reply_markup else None,
                 **await utils.parse_text_entities(self, text, parse_mode, entities)
