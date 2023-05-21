@@ -2753,6 +2753,7 @@ class Message(Object, Update):
     async def edit_text(
         self,
         text: str,
+        photo: str,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: List["types.MessageEntity"] = None,
         disable_web_page_preview: bool = None,
@@ -2804,6 +2805,7 @@ class Message(Object, Update):
             chat_id=self.chat.id,
             message_id=self.id,
             text=text,
+            photo=photo,
             parse_mode=parse_mode,
             entities=entities,
             disable_web_page_preview=disable_web_page_preview,
