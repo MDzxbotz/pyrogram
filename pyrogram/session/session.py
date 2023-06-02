@@ -47,7 +47,7 @@ class Result:
 class Session:
     START_TIMEOUT = 2
     WAIT_TIMEOUT = 15
-    SLEEP_THRESHOLD = 10
+    SLEEP_THRESHOLD = 15
     MAX_RETRIES = 10
     ACKS_THRESHOLD = 10
     PING_INTERVAL = 5
