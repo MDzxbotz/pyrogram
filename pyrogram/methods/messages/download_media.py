@@ -140,10 +140,11 @@ class DownloadMedia:
 
         file_id_obj = FileId.decode(file_id_str)
         
-        if file_id_obj.dc_id != await self.storage.dc_id():
+        file_type = file_id_obj.file_type
+        
+        if (file_id_obj.dc_id != await self.storage.dc_id()) and file_type not in PHOTO_TYPES:
            return None 
     
-        file_type = file_id_obj.file_type
         media_file_name = getattr(media, "file_name", "")
         file_size = getattr(media, "file_size", 0)
         mime_type = getattr(media, "mime_type", "")
