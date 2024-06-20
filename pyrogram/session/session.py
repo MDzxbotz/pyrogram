@@ -46,7 +46,7 @@ class Result:
 
 class Session:
     START_TIMEOUT = 2
-    WAIT_TIMEOUT = 15
+    WAIT_TIMEOUT = 20
     SLEEP_THRESHOLD = 15
     MAX_RETRIES = 10
     ACKS_THRESHOLD = 10
@@ -285,7 +285,10 @@ class Session:
                         ping_id=0, disconnect_delay=self.WAIT_TIMEOUT + 10
                     ), False
                 )
-            except (OSError, RPCError):
+            except OSError:
+                self.loop.create_task(self.restart())
+                break
+            except RPCError:
                 pass
 
         log.info("PingTask stopped")
