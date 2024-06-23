@@ -52,6 +52,8 @@ from pyrogram.session import Auth, Session
 from pyrogram.storage import FileStorage, MemoryStorage
 from pyrogram.types import User, TermsOfService
 from pyrogram.utils import ainput
+from .connection import Connection
+from .connection.transport import TCP, TCPAbridged
 from .dispatcher import Dispatcher
 from .file_id import FileId, FileType, ThumbnailSource
 from .mime_types import mime_types
@@ -264,6 +266,9 @@ class Client(Methods):
         else:
             self.storage = FileStorage(self.name, self.workdir)
 
+        self.connection_factory = Connection
+        self.protocol_factory = TCPAbridged
+        
         self.dispatcher = Dispatcher(self)
 
         self.rnd_id = MsgId
