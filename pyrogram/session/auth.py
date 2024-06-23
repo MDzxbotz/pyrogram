@@ -81,7 +81,6 @@ class Auth:
                 dc_id=self.dc_id,
                 test_mode=self.test_mode,
                 ipv6=self.ipv6,
-                alt_port=self.alt_port,
                 proxy=self.proxy,
                 media=False,
                 protocol_factory=self.protocol_factory
