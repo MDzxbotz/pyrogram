@@ -106,7 +106,6 @@ class Session:
                 dc_id=self.dc_id,
                 test_mode=self.test_mode,
                 ipv6=self.client.ipv6,
-                alt_port=self.client.alt_port,
                 proxy=self.client.proxy,
                 media=self.is_media,
                 protocol_factory=self.client.protocol_factory
