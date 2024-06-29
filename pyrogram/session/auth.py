@@ -43,7 +43,9 @@ class Auth:
         self.test_mode = test_mode
         self.ipv6 = client.ipv6
         self.proxy = client.proxy
-
+        self.connection_factory = client.connection_factory
+        self.protocol_factory = client.protocol_factory
+        
         self.connection: Optional[Connection] = None
 
     @staticmethod
