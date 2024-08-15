@@ -634,7 +634,7 @@ class Client(Methods):
 
             await self.storage.api_id(self.api_id)
 
-            await self.storage.dc_id(2)
+            await self.storage.dc_id(5)
             await self.storage.date(0)
 
             await self.storage.test_mode(self.test_mode)
