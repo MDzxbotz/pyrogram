@@ -138,7 +138,7 @@ class SQLiteStorage(Storage):
        )
         
     async def run(self, method, *args):
-       return await self.run_in_executor(
+       return await self.loop.run_in_executor(
            self.executor,
            method, 
            *args
