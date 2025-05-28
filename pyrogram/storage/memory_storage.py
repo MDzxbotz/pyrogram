@@ -33,8 +33,11 @@ class MemoryStorage(SQLiteStorage):
         self.session_string = session_string
 
     async def open(self):
-        self.conn = sqlite3.connect(":memory:", check_same_thread=False)
-        self.create()
+        def connect():
+           self.conn = sqlite3.connect(":memory:", check_same_thread=False)
+
+        await self.run(connect)
+        await self.create()
 
         if self.session_string:
             # Old format
