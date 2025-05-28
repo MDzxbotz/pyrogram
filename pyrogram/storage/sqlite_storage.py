@@ -153,10 +153,12 @@ class SQLiteStorage(Storage):
         )
 
     async def get_peer_by_id(self, peer_id: int):
-        r = await self.execute(
+        cur = await self.execute(
             "SELECT id, access_hash, type FROM peers WHERE id = ?",
             (peer_id,)
-        ).fetchone()
+        )
+        
+        r = await self.run(cur.fetchone)
 
         if r is None:
             raise KeyError(f"ID not found: {peer_id}")
@@ -164,11 +166,13 @@ class SQLiteStorage(Storage):
         return get_input_peer(*r)
 
     async def get_peer_by_username(self, username: str):
-        r = await self.execute(
+        cur = await self.execute(
             "SELECT id, access_hash, type, last_update_on FROM peers WHERE username = ?"
             "ORDER BY last_update_on DESC",
             (username,)
-        ).fetchone()
+        )
+
+        r = await self.run(cur.fetchone)
 
         if r is None:
             raise KeyError(f"Username not found: {username}")
@@ -179,10 +183,12 @@ class SQLiteStorage(Storage):
         return get_input_peer(*r[:3])
 
     async def get_peer_by_phone_number(self, phone_number: str):
-        r = await self.execute(
+        cur = await self.execute(
             "SELECT id, access_hash, type FROM peers WHERE phone_number = ?",
             (phone_number,)
-        ).fetchone()
+        )
+
+        r = await self.run(cur.fetchone)
 
         if r is None:
             raise KeyError(f"Phone number not found: {phone_number}")
@@ -192,9 +198,11 @@ class SQLiteStorage(Storage):
     async def _get(self):
         attr = inspect.stack()[2].function
 
-        return await self.execute(
+        cur = await self.execute(
             f"SELECT {attr} FROM sessions"
-        ).fetchone()[0]
+        )
+        
+        return (await self.run(cur.fetchone))[0]
 
     async def _set(self, value: Any):
         attr = inspect.stack()[2].function
@@ -231,9 +239,10 @@ class SQLiteStorage(Storage):
 
     async def version(self, value: int = object):
         if value == object:
-            return await self.execute(
+            cur = await self.execute(
                 "SELECT number FROM version"
-            ).fetchone()[0]
+            )
+            return (await self.run(cur.fetchone))[0]
         else:
             with self.conn:
                 await self.execute(
