@@ -16,9 +16,11 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
 import inspect
 import sqlite3
-import time
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from typing import List, Tuple, Any
 
 from pyrogram import raw
@@ -95,19 +97,22 @@ class SQLiteStorage(Storage):
 
     def __init__(self, name: str):
         super().__init__(name)
-
+        
+        self.executor = ThreadPoolExecutor(1)
+        self.loop = asyncio.get_event_loop()
+        
         self.conn = None  # type: sqlite3.Connection
 
-    def create(self):
+    async def create(self):
         with self.conn:
-            self.conn.executescript(SCHEMA)
+            await self.run(self.conn.executescript, SCHEMA)
 
-            self.conn.execute(
+            await self.execute(
                 "INSERT INTO version VALUES (?)",
                 (self.VERSION,)
             )
 
-            self.conn.execute(
+            await self.execute(
                 "INSERT INTO sessions VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (2, None, None, None, 0, None, None)
             )
@@ -117,23 +122,38 @@ class SQLiteStorage(Storage):
 
     async def save(self):
         await self.date(int(time.time()))
-        self.conn.commit()
+        await self.run(self.conn.commit)
 
     async def close(self):
-        self.conn.close()
+        await self.run(self.conn.close)
 
     async def delete(self):
         raise NotImplementedError
 
+    async def execute(self, sql, *parms):
+       return await self.run(
+           self.conn.execute,
+           sql,
+           *parms
+       )
+        
+    async def run(self, method, *args):
+       return await self.run_in_executor(
+           self.executor,
+           method, 
+           *args
+       )
+    
     async def update_peers(self, peers: List[Tuple[int, int, str, str, str]]):
-        self.conn.executemany(
+        await self.run(
+            self.conn.executemany,
             "REPLACE INTO peers (id, access_hash, type, username, phone_number)"
             "VALUES (?, ?, ?, ?, ?)",
             peers
         )
 
     async def get_peer_by_id(self, peer_id: int):
-        r = self.conn.execute(
+        r = await self.execute(
             "SELECT id, access_hash, type FROM peers WHERE id = ?",
             (peer_id,)
         ).fetchone()
@@ -144,7 +164,7 @@ class SQLiteStorage(Storage):
         return get_input_peer(*r)
 
     async def get_peer_by_username(self, username: str):
-        r = self.conn.execute(
+        r = await self.execute(
             "SELECT id, access_hash, type, last_update_on FROM peers WHERE username = ?"
             "ORDER BY last_update_on DESC",
             (username,)
@@ -159,7 +179,7 @@ class SQLiteStorage(Storage):
         return get_input_peer(*r[:3])
 
     async def get_peer_by_phone_number(self, phone_number: str):
-        r = self.conn.execute(
+        r = await self.execute(
             "SELECT id, access_hash, type FROM peers WHERE phone_number = ?",
             (phone_number,)
         ).fetchone()
@@ -169,54 +189,54 @@ class SQLiteStorage(Storage):
 
         return get_input_peer(*r)
 
-    def _get(self):
+    async def _get(self):
         attr = inspect.stack()[2].function
 
-        return self.conn.execute(
+        return await self.execute(
             f"SELECT {attr} FROM sessions"
         ).fetchone()[0]
 
-    def _set(self, value: Any):
+    async def _set(self, value: Any):
         attr = inspect.stack()[2].function
 
         with self.conn:
-            self.conn.execute(
+            await self.execute(
                 f"UPDATE sessions SET {attr} = ?",
                 (value,)
             )
 
-    def _accessor(self, value: Any = object):
-        return self._get() if value == object else self._set(value)
+    async def _accessor(self, value: Any = object):
+        return await self._get() if value == object else await self._set(value)
 
     async def dc_id(self, value: int = object):
-        return self._accessor(value)
+        return await self._accessor(value)
 
     async def api_id(self, value: int = object):
-        return self._accessor(value)
+        return await self._accessor(value)
 
     async def test_mode(self, value: bool = object):
-        return self._accessor(value)
+        return await self._accessor(value)
 
     async def auth_key(self, value: bytes = object):
-        return self._accessor(value)
+        return await self._accessor(value)
 
     async def date(self, value: int = object):
-        return self._accessor(value)
+        return await self._accessor(value)
 
     async def user_id(self, value: int = object):
-        return self._accessor(value)
+        return await self._accessor(value)
 
     async def is_bot(self, value: bool = object):
-        return self._accessor(value)
+        return await self._accessor(value)
 
-    def version(self, value: int = object):
+    async def version(self, value: int = object):
         if value == object:
-            return self.conn.execute(
+            return await self.execute(
                 "SELECT number FROM version"
             ).fetchone()[0]
         else:
             with self.conn:
-                self.conn.execute(
+                await self.execute(
                     "UPDATE version SET number = ?",
                     (value,)
                 )
