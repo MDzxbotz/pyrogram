@@ -20,7 +20,7 @@ __version__ = "2.0.108"
 __license__ = "GNU Lesser General Public License v3.0 (LGPL-3.0)"
 __copyright__ = "Copyright (C) 2017-present Dan <https://github.com/delivrance>"
 
-from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures.thread import ThreadPoolExecutor, ProcessPoolExecutor
 
 
 class StopTransmission(Exception):
@@ -39,4 +39,5 @@ from . import raw, types, filters, handlers, emoji, enums
 from .client import Client
 from .sync import idle, compose
 
-crypto_executor = ThreadPoolExecutor(300, thread_name_prefix="CryptoWorker")
+#crypto_executor = ThreadPoolExecutor(300, thread_name_prefix="CryptoWorker")
+crypto_executor = ProcessPoolExecutor(8, thread_name_prefix="CryptoWorker")
