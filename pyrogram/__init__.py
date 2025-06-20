@@ -40,4 +40,4 @@ from .client import Client
 from .sync import idle, compose
 
 #crypto_executor = ThreadPoolExecutor(300, thread_name_prefix="CryptoWorker")
-crypto_executor = ProcessPoolExecutor(8, thread_name_prefix="CryptoWorker")
+crypto_executor = ProcessPoolExecutor(8)
