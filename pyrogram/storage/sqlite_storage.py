@@ -126,7 +126,8 @@ class SQLiteStorage(Storage):
 
     async def close(self):
         await self.run(self.conn.close)
-
+        self.executor.shutdown()
+        
     async def delete(self):
         raise NotImplementedError
 
@@ -145,16 +146,14 @@ class SQLiteStorage(Storage):
         )
     
     async def update_peers(self, peers: List[Tuple[int, int, str, str, str]]):
-        with self.conn:
-            
-           def execute_many():
-               self.conn.executemany(
-                  "REPLACE INTO peers (id, access_hash, type, username, phone_number)"
-                  "VALUES (?, ?, ?, ?, ?)",
-                  peers
-               )
+        def execute_many():
+            self.conn.executemany(
+                "REPLACE INTO peers (id, access_hash, type, username, phone_number)"
+                "VALUES (?, ?, ?, ?, ?)",
+                peers
+            )
                
-           await self.run(execute_many)
+        await self.run(execute_many)
 
     async def get_peer_by_id(self, peer_id: int):
         cur = await self.execute(
