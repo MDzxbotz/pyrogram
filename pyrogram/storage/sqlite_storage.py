@@ -126,7 +126,7 @@ class SQLiteStorage(Storage):
 
     async def close(self):
         await self.run(self.conn.close)
-        self.executor.shutdown()
+        self.executor.shutdown(cancel_futures=True)
         
     async def delete(self):
         raise NotImplementedError
