@@ -17,6 +17,8 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
+# file from  Pyrofork
+
 import logging
 from datetime import datetime
 from functools import partial
@@ -560,8 +562,7 @@ class Message(Object, Update):
             "types.ForceReply"
         ] = None,
         reactions: List["types.Reaction"] = None,
-        chat_join_type: "enums.ChatJoinType" = None,
-        raw: "raw.types.Message" = None
+        chat_join_type: "enums.ChatJoinType" = None
     ):
         super().__init__(client)
 
@@ -676,44 +677,6 @@ class Message(Object, Update):
         self.payment_refunded = payment_refunded
         self.reactions = reactions
         self.chat_join_type = chat_join_type
-        self.raw = raw
-
-    async def wait_for_click(
-            self,
-            from_user_id: Optional[Union[Union[int, str], List[Union[int, str]]]] = None,
-            timeout: Optional[int] = None,
-            filters=None,
-            alert: Union[str, bool] = True,
-    ):
-        """Waits for a callback query to be clicked on the message.
-
-        Parameters:
-            user_id (``int`` | ``str`` | Iterable of ``int`` | Iterable of ``str``, *optional*):
-                The user ID to listen for.
-
-            timeout (``int``, *optional*):
-                The maximum amount of time to wait for a message.
-
-            filters (:obj:`~pyrogram.filters`, *optional*):
-                A filter to check the incoming message against.
-
-            alert (``str`` | ``bool``):
-                The alert to show when the button is clicked by users that are not allowed in from_user_id.
-
-        Returns:
-            :obj:`~pyrogram.types.CallbackQuery`: The callback query that was clicked.
-        """
-        message_id = getattr(self, "id", getattr(self, "message_id", None))
-
-        return await self._client.listen(
-            filters=filters,
-            timeout=timeout,
-            listener_type=pyrogram.enums.ListenerTypes.CALLBACK_QUERY,
-            unallowed_click_alert=alert,
-            chat_id=self.chat.id,
-            user_id=from_user_id,
-            message_id=message_id,
-        )
 
     @staticmethod
     async def _parse(
@@ -727,7 +690,7 @@ class Message(Object, Update):
         replies: int = 1
     ):
         if isinstance(message, raw.types.MessageEmpty):
-            return Message(id=message.id, empty=True, client=client, raw=message)
+            return Message(id=message.id, empty=True, client=client)
 
         from_id = utils.get_raw_peer_id(message.from_id)
         peer_id = utils.get_raw_peer_id(message.peer_id)
@@ -964,7 +927,6 @@ class Message(Object, Update):
                 gift_code=gift_code,
                 screenshot_taken=screenshot_taken,
                 paid_message_price_changed=paid_message_price_changed,
-                raw=message,
                 chat_join_type=chat_join_type,
                 client=client
                 # TODO: supergroup_chat_created
@@ -1289,7 +1251,6 @@ class Message(Object, Update):
                 reply_markup=reply_markup,
                 reactions=reactions,
                 effect_id=getattr(message, "effect", None),
-                raw=message,
                 client=client
             )
             if parsed_message.chat.type is not enums.ChatType.CHANNEL:
@@ -1370,6 +1331,7 @@ class Message(Object, Update):
                             pass
                         else:
                             parsed_message.reply_to_story = reply_to_story
+                            
             if parsed_message.chat.type == enums.ChatType.FORUM and parsed_message.message_thread_id is None:
                 parsed_message.message_thread_id = 1
                 parsed_message.is_topic_message = True
@@ -1398,27 +1360,16 @@ class Message(Object, Update):
     def content(self) -> str:
         return self.text or self.caption or Str("").init([])
 
-    # region Deprecated
-    # TODO: Remove later
     @property
     def forward_from(self) -> Optional["types.User"]:
-        log.warning(
-            "`message.forward_from` is deprecated and will be removed in future updates. Use `message.forward_origin.sender_user` instead."
-        )
         return getattr(self.forward_origin, "sender_user", None)
 
     @property
     def forward_sender_name(self) -> Optional[str]:
-        log.warning(
-            "`message.forward_sender_name` property is deprecated and will be removed in future updates. Use `message.forward_origin.sender_user_name` instead."
-        )
         return getattr(self.forward_origin, "sender_user_name", None)
 
     @property
     def forward_from_chat(self) -> Optional["types.Chat"]:
-        log.warning(
-            "`message.forward_from_chat` property is deprecated and will be removed in future updates. Use `message.forward_origin.chat.sender_chat` instead."
-        )
         return getattr(
             self.forward_origin,
             "chat",
@@ -1431,26 +1382,15 @@ class Message(Object, Update):
 
     @property
     def forward_from_message_id(self) -> Optional[int]:
-        log.warning(
-            "`message.forward_from_message_id` property is deprecated and will be removed in future updates. Use `message.forward_origin.message_id` instead."
-        )
         return getattr(self.forward_origin, "message_id", None)
 
     @property
     def forward_signature(self) -> Optional[str]:
-        log.warning(
-            "`message.forward_signature` property is deprecated and will be removed in future updates. Use `message.forward_origin.author_signature` instead."
-        )
         return getattr(self.forward_origin, "author_signature", None)
 
     @property
     def forward_date(self) -> Optional[datetime]:
-        log.warning(
-            "`message.forward_date` property is deprecated and will be removed in future updates. Use `message.forward_origin.date` instead."
-        )
         return getattr(self.forward_origin, "date", None)
-
-    # endregion
     
     async def get_media_group(self) -> List["types.Message"]:
         """Bound method *get_media_group* of :obj:`~pyrogram.types.Message`.
@@ -5066,192 +5006,7 @@ class Message(Object, Update):
             message_ids=self.id,
             revoke=revoke
         )
-
-    async def click(
-        self,
-        x: Union[int, str] = 0,
-        y: int = None,
-        quote: bool = None,
-        timeout: int = 10,
-        request_write_access: bool = True,
-        password: str = None
-    ):
-        """Bound method *click* of :obj:`~pyrogram.types.Message`.
-
-        Use as a shortcut for clicking a button attached to the message instead of:
-
-        - Clicking inline buttons:
-
-        .. code-block:: python
-
-            await client.request_callback_answer(
-                chat_id=message.chat.id,
-                message_id=message.id,
-                callback_data=message.reply_markup[i][j].callback_data
-            )
-
-        - Clicking normal buttons:
-
-        .. code-block:: python
-
-            await client.send_message(
-                chat_id=message.chat.id,
-                text=message.reply_markup[i][j].text
-            )
-
-        Example:
-            This method can be used in three different ways:
-
-            1.  Pass one integer argument only (e.g.: ``.click(2)``, to click a button at index 2).
-                Buttons are counted left to right, starting from the top.
-
-            2.  Pass two integer arguments (e.g.: ``.click(1, 0)``, to click a button at position (1, 0)).
-                The origin (0, 0) is top-left.
-
-            3.  Pass one string argument only (e.g.: ``.click("Settings")``, to click a button by using its label).
-                Only the first matching button will be pressed.
-
-        Parameters:
-            x (``int`` | ``str``):
-                Used as integer index, integer abscissa (in pair with y) or as string label.
-                Defaults to 0 (first button).
-
-            y (``int``, *optional*):
-                Used as ordinate only (in pair with x).
-
-            quote (``bool``, *optional*):
-                Useful for normal buttons only, where pressing it will result in a new message sent.
-                If ``True``, the message will be sent as a reply to this message.
-                Defaults to ``True`` in group chats and ``False`` in private chats.
-
-            timeout (``int``, *optional*):
-                Timeout in seconds.
-
-            request_write_access (``bool``, *optional*):
-                Only used in case of :obj:`~pyrogram.types.LoginUrl` button.
-                True, if the bot can send messages to the user.
-                Defaults to ``True``.
-
-            password (``str``, *optional*):
-                When clicking certain buttons (such as BotFather's confirmation button to transfer ownership), if your account has 2FA enabled, you need to provide your account's password.
-                The 2-step verification password for the current user. Only applicable, if the :obj:`~pyrogram.types.InlineKeyboardButton` contains ``requires_password``.
-
-        Returns:
-            -   The result of :meth:`~pyrogram.Client.request_callback_answer` in case of inline callback button clicks.
-            -   The result of :meth:`~Message.reply()` in case of normal button clicks.
-            -   A string in case the inline button is a URL, a *switch_inline_query* or a
-                *switch_inline_query_current_chat* button.
-            -   A string URL with the user details, in case of a WebApp button.
-            -   A :obj:`~pyrogram.types.Chat` object in case of a ``KeyboardButtonUserProfile`` button.
-
-        Raises:
-            RPCError: In case of a Telegram RPC error.
-            ValueError: In case the provided index or position is out of range or the button label was not found.
-            TimeoutError: In case, after clicking an inline button, the bot fails to answer within the timeout.
-        """
-
-        if isinstance(self.reply_markup, types.ReplyKeyboardMarkup):
-            keyboard = self.reply_markup.keyboard
-            is_inline = False
-        elif isinstance(self.reply_markup, types.InlineKeyboardMarkup):
-            keyboard = self.reply_markup.inline_keyboard
-            is_inline = True
-        else:
-            raise ValueError("The message doesn't contain any keyboard")
-
-        if isinstance(x, int) and y is None:
-            try:
-                button = [
-                    button
-                    for row in keyboard
-                    for button in row
-                ][x]
-            except IndexError:
-                raise ValueError(f"The button at index {x} doesn't exist")
-        elif isinstance(x, int) and isinstance(y, int):
-            try:
-                button = keyboard[y][x]
-            except IndexError:
-                raise ValueError(f"The button at position ({x}, {y}) doesn't exist")
-        elif isinstance(x, str) and y is None:
-            label = x.encode("utf-16", "surrogatepass").decode("utf-16")
-
-            try:
-                button = [
-                    button
-                    for row in keyboard
-                    for button in row
-                    if label == button.text
-                ][0]
-            except IndexError:
-                raise ValueError(f"The button with label '{x}' doesn't exists")
-        else:
-            raise ValueError("Invalid arguments")
-
-        if is_inline:
-            if button.callback_data:
-                return await self._client.request_callback_answer(
-                    chat_id=self.chat.id,
-                    message_id=self.id,
-                    callback_data=button.callback_data,
-                    timeout=timeout
-                )
-            elif button.requires_password:
-                if password is None:
-                    raise ValueError(
-                        "This button requires a password"
-                    )
-
-                return await self._client.request_callback_answer(
-                    chat_id=self.chat.id,
-                    message_id=self.id,
-                    callback_data=button.callback_data,
-                    password=password,
-                    timeout=timeout
-                )
-            elif button.url:
-                return button.url
-            elif button.web_app:
-                web_app = button.web_app
-
-                bot_peer_id = (
-                    self.via_bot and
-                    self.via_bot.id
-                ) or (
-                    self.from_user and
-                    self.from_user.is_bot and
-                    self.from_user.id
-                ) or None
-
-                if not bot_peer_id:
-                    raise ValueError(
-                        "This button requires a bot as the sender"
-                    )
-
-                r = await self._client.invoke(
-                    raw.functions.messages.RequestWebView(
-                        peer=await self._client.resolve_peer(self.chat.id),
-                        bot=await self._client.resolve_peer(bot_peer_id),
-                        url=web_app.url,
-                        platform=self._client.client_platform.value,
-                        # TODO
-                    )
-                )
-                return r.url
-            elif button.user_id:
-                return await self._client.get_chat(
-                    button.user_id,
-                    force_full=False
-                )
-            elif button.switch_inline_query:
-                return button.switch_inline_query
-            elif button.switch_inline_query_current_chat:
-                return button.switch_inline_query_current_chat
-            else:
-                raise ValueError("This button is not supported yet")
-        else:
-            await self.reply(text=button, quote=quote)
-
+        
     async def react(self, emoji: str = "", big: bool = False, add_to_recent: bool = True) -> "types.MessageReactions":
         """Bound method *react* of :obj:`~pyrogram.types.Message`.
 
@@ -5507,107 +5262,6 @@ class Message(Object, Update):
             chat_id=self.chat.id,
             message_id=self.id
         )
-
-    async def ask(
-        self,
-        text: str,
-        quote: bool = None,
-        parse_mode: Optional["enums.ParseMode"] = None,
-        entities: List["types.MessageEntity"] = None,
-        disable_web_page_preview: bool = None,
-        disable_notification: bool = None,
-        reply_to_message_id: int = None,
-        reply_markup=None,
-        filters=None,
-        timeout: int = None
-    ) -> "Message":
-        """Bound method *ask* of :obj:`~pyrogram.types.Message`.
-        
-        Use as a shortcut for:
-
-        .. code-block:: python
-
-            client.send_message(chat_id, "What is your name?")
-
-            client.wait_for_message(chat_id)
-
-        Parameters:
-            text (``str``):
-                Text of the message to be sent.
-
-            quote (``bool``, *optional*):
-                If ``True``, the message will be sent as a reply to this message.
-                If *reply_to_message_id* is passed, this parameter will be ignored.
-                Defaults to ``True`` in group chats and ``False`` in private chats.
-
-            parse_mode (:obj:`~pyrogram.enums.ParseMode`, *optional*):
-                By default, texts are parsed using both Markdown and HTML styles.
-                You can combine both syntaxes together.
-                Pass "markdown" or "md" to enable Markdown-style parsing only.
-                Pass "html" to enable HTML-style parsing only.
-                Pass None to completely disable style parsing.
-
-            entities (List of :obj:`~pyrogram.types.MessageEntity`):
-                List of special entities that appear in message text, which can be specified instead of *parse_mode*.
-
-            disable_web_page_preview (``bool``, *optional*):
-                Disables link previews for links in this message.
-
-            disable_notification (``bool``, *optional*):
-                Sends the message silently.
-                Users will receive a notification with no sound.
-
-            reply_to_message_id (``int``, *optional*):
-                If the message is a reply, ID of the original message.
-
-            reply_markup (:obj:`~pyrogram.types.InlineKeyboardMarkup` | :obj:`~pyrogram.types.ReplyKeyboardMarkup` | :obj:`~pyrogram.types.ReplyKeyboardRemove` | :obj:`~pyrogram.types.ForceReply`, *optional*):
-                Additional interface options. An object for an inline keyboard, custom reply keyboard,
-                instructions to remove reply keyboard or to force a reply from the user.
-
-            filters (:obj:`Filters`):
-                Pass one or more filters to allow only a subset of callback queries to be passed
-                in your callback function.
-
-            timeout (``int``, *optional*):
-                Timeout in seconds.
-            
-        Example:
-            .. code-block:: python
-
-                message.ask("What is your name?")
-
-        Returns:
-            :obj:`~pyrogram.types.Message`: On success, the reply message is returned.
-
-        Raises:
-            RPCError: In case of a Telegram RPC error.
-            asyncio.TimeoutError: In case reply not received within the timeout.
-        """
-        if quote is None:
-            quote = self.chat.type != "private"
-
-        if reply_to_message_id is None and quote:
-            reply_to_message_id = self.id
-
-        request = await self._client.send_message(
-            chat_id=self.chat.id,
-            text=text,
-            parse_mode=parse_mode,
-            entities=entities,
-            disable_web_page_preview=disable_web_page_preview,
-            disable_notification=disable_notification,
-            reply_to_message_id=reply_to_message_id,
-            reply_markup=reply_markup
-        )
-
-        reply_message = await self._client.wait_for_message(
-            self.chat.id,
-            filters=filters,
-            timeout=timeout
-        )
-
-        reply_message.request = request
-        return reply_message
 
     async def transcribe(self) -> "types.TranscribeAudio":
         """Bound method *transcribe* of :obj:`~pyrogram.types.Message`.
