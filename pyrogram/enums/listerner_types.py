@@ -1,5 +1,5 @@
 #  Pyrofork - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2020 Cezar H. <https://github.com/usernein>
 #  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrofork.
@@ -17,27 +17,16 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyrogram import raw
+from enum import auto
+
 from .auto_name import AutoName
 
 
-class ChatMembersFilter(AutoName):
-    """Chat members filter enumeration used in :meth:`~pyrogram.Client.get_chat_members`"""
+class ListenerTypes(AutoName):
+    """Listener type enumeration used in :obj:`~pyrogram.types.Client`."""
 
-    SEARCH = raw.types.ChannelParticipantsSearch
-    "Search for members"
+    MESSAGE = auto()
+    "A Message"
 
-    BANNED = raw.types.ChannelParticipantsKicked
-    "Banned members"
-
-    RESTRICTED = raw.types.ChannelParticipantsBanned
-    "Restricted members"
-
-    BOTS = raw.types.ChannelParticipantsBots
-    "Bots"
-
-    RECENT = raw.types.ChannelParticipantsRecent
-    "Recently active members"
-
-    ADMINISTRATORS = raw.types.ChannelParticipantsAdmins
-    "Administrators"
+    CALLBACK_QUERY = auto()
+    "A CallbackQuery"

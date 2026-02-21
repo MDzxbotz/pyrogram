@@ -17,27 +17,19 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyrogram import raw
+from enum import auto
+
 from .auto_name import AutoName
 
 
-class ChatMembersFilter(AutoName):
-    """Chat members filter enumeration used in :meth:`~pyrogram.Client.get_chat_members`"""
+class GiftForResaleOrder(AutoName):
+    """Describes order in which upgraded gifts for resale will be sorted. Used in :meth:`~pyrogram.Client.search_gifts_for_resale`."""
 
-    SEARCH = raw.types.ChannelParticipantsSearch
-    "Search for members"
+    PRICE = auto()
+    "The gifts will be sorted by their price from the lowest to the highest"
 
-    BANNED = raw.types.ChannelParticipantsKicked
-    "Banned members"
+    CHANGE_DATE = auto()
+    "The gifts will be sorted by the last date when their price was changed from the newest to the oldest"
 
-    RESTRICTED = raw.types.ChannelParticipantsBanned
-    "Restricted members"
-
-    BOTS = raw.types.ChannelParticipantsBots
-    "Bots"
-
-    RECENT = raw.types.ChannelParticipantsRecent
-    "Recently active members"
-
-    ADMINISTRATORS = raw.types.ChannelParticipantsAdmins
-    "Administrators"
+    NUMBER = auto()
+    "The gifts will be sorted by their number from the smallest to the largest"

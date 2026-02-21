@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 from enum import auto
 
@@ -34,13 +35,13 @@ class ChatEventAction(AutoName):
     "The linked chat has been changed (see ``old_linked_chat`` and ``new_linked_chat``)"
 
     # LOCATION_CHANGED = auto()
-    ""
+    # ""
 
     PHOTO_CHANGED = auto()
     "The chat photo has been changed (see ``old_photo`` and ``new_photo``)"
 
     # STICKER_SET_CHANGED = auto()
-    ""
+    # ""
 
     TITLE_CHANGED = auto()
     "the chat title has been changed (see ``old_title`` and ``new_title``)"
@@ -55,7 +56,7 @@ class ChatEventAction(AutoName):
     "a message has been deleted (see ``deleted_message``)"
 
     # VOICE_CHAT_DISCARDED = auto()
-    ""
+    # ""
 
     MESSAGE_EDITED = auto()
     "a message has been edited (see ``old_message`` and ``new_message``)"
@@ -76,13 +77,13 @@ class ChatEventAction(AutoName):
     "a member joined by themselves. (see ``user``)"
 
     # MEMBER_JOINED_BY_LINK = auto()
-    ""
+    # ""
 
     MEMBER_LEFT = auto()
     "a member left by themselves. (see ``user``)"
 
     # MEMBER_MUTED = auto()
-    ""
+    # ""
 
     ADMINISTRATOR_PRIVILEGES_CHANGED = auto()
     "a chat member has been promoted/demoted or their administrator privileges has changed (see ``old_administrator_privileges`` and ``new_administrator_privileges``)"
@@ -91,19 +92,19 @@ class ChatEventAction(AutoName):
     "a chat member has been restricted/unrestricted or banned/unbanned, or their permissions has changed (see ``old_member_permissions`` and ``new_member_permissions``)"
 
     # MEMBER_UNMUTED = auto()
-    ""
+    # ""
 
     # MEMBER_VOLUME_CHANGED = auto()
-    ""
+    # ""
 
     # VIDEO_CHAT_STARTED = auto()
-    ""
+    # ""
 
     POLL_STOPPED = auto()
     "a poll has been stopped (see ``stopped_poll``)"
 
     # VOICE_CHAT_SETTINGS_CHANGED = auto()
-    ""
+    # ""
 
     INVITES_ENABLED = auto()
     "the chat invitation has been enabled or disabled (see ``invites_enabled``)"
@@ -122,6 +123,15 @@ class ChatEventAction(AutoName):
 
     MESSAGE_UNPINNED = auto()
     "a message has been unpinned (see ``unpinned_message``)"
+
+    CREATED_FORUM_TOPIC = auto()
+    "a new forum topic has been created (see `created_forum_topic`)"
+
+    EDITED_FORUM_TOPIC = auto()
+    "a forum topic has been edited (see `old_forum_topic` and `new_forum_topic`)"
+
+    DELETED_FORUM_TOPIC = auto()
+    "a forum topic has been deleted (see `deleted_forum_topic`)"
 
     UNKNOWN = auto()
     "Unknown chat event action"

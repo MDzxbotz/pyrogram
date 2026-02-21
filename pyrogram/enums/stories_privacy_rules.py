@@ -1,5 +1,4 @@
 #  Pyrofork - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
 #  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrofork.
@@ -17,27 +16,25 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyrogram import raw
+from enum import auto
+
 from .auto_name import AutoName
 
 
-class ChatMembersFilter(AutoName):
-    """Chat members filter enumeration used in :meth:`~pyrogram.Client.get_chat_members`"""
+class StoriesPrivacyRules(AutoName):
+    """Stories privacy rules type enumeration used in :meth:`~pyrogram.Client.send_story` and :meth:`~pyrogram.Client.edit_story`."""
 
-    SEARCH = raw.types.ChannelParticipantsSearch
-    "Search for members"
+    PUBLIC = auto()
+    "Public stories"
 
-    BANNED = raw.types.ChannelParticipantsKicked
-    "Banned members"
+    CLOSE_FRIENDS = auto()
+    "Close_Friends stories"
 
-    RESTRICTED = raw.types.ChannelParticipantsBanned
-    "Restricted members"
+    CONTACTS = auto()
+    "Contacts only stories"
 
-    BOTS = raw.types.ChannelParticipantsBots
-    "Bots"
+    PRIVATE = auto()
+    "Private stories"
 
-    RECENT = raw.types.ChannelParticipantsRecent
-    "Recently active members"
-
-    ADMINISTRATORS = raw.types.ChannelParticipantsAdmins
-    "Administrators"
+    NO_CONTACTS = auto()
+    "Hide stories from contacts"
