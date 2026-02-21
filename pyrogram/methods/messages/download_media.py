@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
 import os
@@ -31,7 +32,7 @@ DEFAULT_DOWNLOAD_DIR = "downloads/"
 class DownloadMedia:
     async def download_media(
         self: "pyrogram.Client",
-        message: Union["types.Message", str],
+        message: Union["types.Message", "types.Story", str],
         file_name: str = DEFAULT_DOWNLOAD_DIR,
         in_memory: bool = False,
         block: bool = True,
@@ -43,8 +44,8 @@ class DownloadMedia:
         .. include:: /_includes/usable-by/users-bots.rst
 
         Parameters:
-            message (:obj:`~pyrogram.types.Message` | ``str``):
-                Pass a Message containing the media, the media itself (message.audio, message.video, ...) or a file id
+            message (:obj:`~pyrogram.types.Message` | :obj:`~pyrogram.types.Story` | ``str``):
+                Pass a Message/Story containing the media, the media itself (message.audio, message.video, ...) or a file id
                 as string.
 
             file_name (``str``, *optional*):
@@ -122,7 +123,7 @@ class DownloadMedia:
         available_media = ("audio", "document", "photo", "sticker", "animation", "video", "voice", "video_note",
                            "new_chat_photo")
 
-        if isinstance(message, types.Message):
+        if isinstance(message, types.Message) or isinstance(message, types.Story):
             for kind in available_media:
                 media = getattr(message, kind, None)
 
@@ -139,12 +140,8 @@ class DownloadMedia:
             file_id_str = media.file_id
 
         file_id_obj = FileId.decode(file_id_str)
-        
+
         file_type = file_id_obj.file_type
-        
-        if (file_id_obj.dc_id != await self.storage.dc_id()) and file_type not in PHOTO_TYPES:
-           return None 
-    
         media_file_name = getattr(media, "file_name", "")
         file_size = getattr(media, "file_size", 0)
         mime_type = getattr(media, "mime_type", "")
@@ -152,6 +149,17 @@ class DownloadMedia:
 
         directory, file_name = os.path.split(file_name)
         file_name = file_name or media_file_name or ""
+
+        # Sanitize file name
+        # CWE-22: Path Traversal
+        if file_name:
+            # Remove any path components, keeping only the basename
+            file_name = os.path.basename(file_name)
+            # Remove null bytes which could cause issues
+            file_name = file_name.replace('\x00', '')
+            # Handle edge cases
+            if not file_name or file_name in ('.', '..'):
+                file_name = ""
 
         if not os.path.isabs(file_name):
             directory = self.PARENT_DIR / (directory or DEFAULT_DOWNLOAD_DIR)

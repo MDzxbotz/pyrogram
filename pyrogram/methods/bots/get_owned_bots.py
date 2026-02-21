@@ -16,29 +16,31 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
+
+from typing import List
 import pyrogram
-from pyrogram import raw
+from pyrogram import raw, types
 
 
-class AcceptTermsOfService:
-    async def accept_terms_of_service(
+class GetOwnedBots:
+    async def get_owned_bots(
         self: "pyrogram.Client",
-        terms_of_service_id: str
-    ) -> bool:
-        """Accept the given terms of service.
+    ) -> List["types.User"]:
+        """Returns the list of bots owned by the current user.
 
         .. include:: /_includes/usable-by/users.rst
 
-        Parameters:
-            terms_of_service_id (``str``):
-                The terms of service identifier.
-        """
-        r = await self.invoke(
-            raw.functions.help.AcceptTermsOfService(
-                id=raw.types.DataJSON(
-                    data=terms_of_service_id
-                )
-            )
-        )
+        Returns:
+            List of :obj:`~pyrogram.types.User`: On success.
 
-        return bool(r)
+        Example:
+            .. code-block:: python
+
+                bots = await app.get_owned_bots()
+        """
+
+        bots = await self.invoke(raw.functions.bots.GetAdminedBots())
+        return types.List([
+            types.User._parse(self, b)
+            for b in bots
+        ])

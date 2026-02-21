@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Union, List
 
@@ -35,12 +36,13 @@ class AddChatMembers:
 
         Parameters:
             chat_id (``int`` | ``str``):
-                The group, supergroup or channel id
+                The group, supergroup or channel id or chat/channel public link
 
             user_ids (``int`` | ``str`` | List of ``int`` or ``str``):
                 Users to add in the chat
                 You can pass an ID (int), username (str) or phone number (str).
                 Multiple users can be added by passing a list of IDs, usernames or phone numbers.
+                You can also use user profile link in form of *t.me/<username>* (str).
 
             forward_limit (``int``, *optional*):
                 How many of the latest messages you want to forward to the new members. Pass 0 to forward none of them.

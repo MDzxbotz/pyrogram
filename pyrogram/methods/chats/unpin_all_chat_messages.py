@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Union
 
@@ -26,6 +27,7 @@ class UnpinAllChatMessages:
     async def unpin_all_chat_messages(
         self: "pyrogram.Client",
         chat_id: Union[int, str],
+        message_thread_id: int = None,
     ) -> bool:
         """Use this method to clear the list of pinned messages in a chat.
         If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have
@@ -36,6 +38,10 @@ class UnpinAllChatMessages:
         Parameters:
             chat_id (``int`` | ``str``):
                 Unique identifier (int) or username (str) of the target chat.
+                You can also use chat public link in form of *t.me/<username>* (str).
+
+            message_thread_id (``int``, *optional*):
+                Unique identifier for the target message thread of the forum topic
 
         Returns:
             ``bool``: True on success.
@@ -46,10 +52,10 @@ class UnpinAllChatMessages:
                 # Unpin all chat messages
                 await app.unpin_all_chat_messages(chat_id)
         """
-        await self.invoke(
+        r = await self.invoke(
             raw.functions.messages.UnpinAllMessages(
-                peer=await self.resolve_peer(chat_id)
+                peer=await self.resolve_peer(chat_id),
+                top_msg_id=message_thread_id
             )
         )
-
-        return True
+        return r.pts_count
