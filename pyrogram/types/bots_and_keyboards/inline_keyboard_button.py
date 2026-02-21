@@ -1,22 +1,23 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Union
+from typing import Union, Optional
 
 import pyrogram
 from pyrogram import raw
@@ -69,19 +70,27 @@ class InlineKeyboardButton(Object):
         callback_game (:obj:`~pyrogram.types.CallbackGame`, *optional*):
             Description of the game that will be launched when the user presses the button.
             **NOTE**: This type of button **must** always be the first button in the first row.
+
+        callback_data_with_password (``bytes``, *optional*):
+            A button that asks for the 2-step verification password of the current user and then sends a callback query to a bot Data to be sent to the bot via a callback query.
+
+        copy_text (``str``, *optional*):
+            A button that copies the text to the clipboard.
     """
 
     def __init__(
         self,
         text: str,
-        callback_data: Union[str, bytes] = None,
-        url: str = None,
-        web_app: "types.WebAppInfo" = None,
-        login_url: "types.LoginUrl" = None,
-        user_id: int = None,
-        switch_inline_query: str = None,
-        switch_inline_query_current_chat: str = None,
-        callback_game: "types.CallbackGame" = None
+        callback_data: Optional[Union[str, bytes]] = None,
+        url: Optional[str] = None,
+        web_app: Optional["types.WebAppInfo"] = None,
+        login_url: Optional["types.LoginUrl"] = None,
+        user_id: Optional[int] = None,
+        switch_inline_query: Optional[str] = None,
+        switch_inline_query_current_chat: Optional[str] = None,
+        callback_game: Optional["types.CallbackGame"] = None,
+        requires_password: Optional[bool] = None,
+        copy_text: Optional[str] = None
     ):
         super().__init__()
 
@@ -94,7 +103,9 @@ class InlineKeyboardButton(Object):
         self.switch_inline_query = switch_inline_query
         self.switch_inline_query_current_chat = switch_inline_query_current_chat
         self.callback_game = callback_game
+        self.requires_password = requires_password
         # self.pay = pay
+        self.copy_text = copy_text
 
     @staticmethod
     def read(b: "raw.base.KeyboardButton"):
@@ -108,7 +119,8 @@ class InlineKeyboardButton(Object):
 
             return InlineKeyboardButton(
                 text=b.text,
-                callback_data=data
+                callback_data=data,
+                requires_password=getattr(b, "requires_password", None)
             )
 
         if isinstance(b, raw.types.KeyboardButtonUrl):
@@ -155,6 +167,15 @@ class InlineKeyboardButton(Object):
                 )
             )
 
+        if isinstance(b, raw.types.KeyboardButtonCopy):
+            return types.InlineKeyboardButton(
+                text=b.text,
+                copy_text=b.copy_text
+            )
+
+        if isinstance(b, raw.types.KeyboardButtonBuy):
+            return types.InlineKeyboardButtonBuy.read(b)
+
     async def write(self, client: "pyrogram.Client"):
         if self.callback_data is not None:
             # Telegram only wants bytes, but we are allowed to pass strings too, for convenience.
@@ -162,7 +183,8 @@ class InlineKeyboardButton(Object):
 
             return raw.types.KeyboardButtonCallback(
                 text=self.text,
-                data=data
+                data=data,
+                requires_password=self.requires_password
             )
 
         if self.url is not None:
@@ -205,4 +227,10 @@ class InlineKeyboardButton(Object):
             return raw.types.KeyboardButtonWebView(
                 text=self.text,
                 url=self.web_app.url
+            )
+
+        if self.copy_text is not None:
+            return raw.types.KeyboardButtonCopy(
+                text=self.text,
+                copy_text=self.copy_text
             )

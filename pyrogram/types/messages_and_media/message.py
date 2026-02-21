@@ -17,8 +17,6 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-# file from  Pyrofork
-
 import logging
 from datetime import datetime
 from functools import partial
@@ -562,7 +560,7 @@ class Message(Object, Update):
             "types.ForceReply"
         ] = None,
         reactions: List["types.Reaction"] = None,
-        chat_join_type: "enums.ChatJoinType" = None
+        chat_join_type: "enums.ChatJoinType" = None,
     ):
         super().__init__(client)
 
@@ -690,7 +688,7 @@ class Message(Object, Update):
         replies: int = 1
     ):
         if isinstance(message, raw.types.MessageEmpty):
-            return Message(id=message.id, empty=True, client=client)
+            return Message(id=message.id, empty=True, client=client, raw=message)
 
         from_id = utils.get_raw_peer_id(message.from_id)
         peer_id = utils.get_raw_peer_id(message.peer_id)
@@ -1331,7 +1329,7 @@ class Message(Object, Update):
                             pass
                         else:
                             parsed_message.reply_to_story = reply_to_story
-                            
+
             if parsed_message.chat.type == enums.ChatType.FORUM and parsed_message.message_thread_id is None:
                 parsed_message.message_thread_id = 1
                 parsed_message.is_topic_message = True
