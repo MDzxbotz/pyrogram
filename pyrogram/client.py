@@ -293,6 +293,7 @@ class Client(Methods):
         self.me: Optional[User] = None
 
         self.message_cache = Cache(10000)
+        self.business_user_connection_cache = Cache(10)
 
         # Sometimes, for some reason, the server will stop sending updates and will only respond to pings.
         # This watchdog will invoke updates.GetState in order to wake up the server and enable it sending updates again
