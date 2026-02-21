@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 from pyrogram import raw
 from ..object import Object
@@ -62,8 +63,27 @@ class ChatPrivileges(Object):
             Groups and supergroups only.
             True, if the user is allowed to pin messages.
 
+        can_manage_topics (``bool``, *optional*):
+            supergroups only.
+            True, if the user is allowed to create, rename, close, and reopen forum topics.
+
+        can_post_stories (``bool``, *optional*):
+            Channels only.
+            True, if the administrator can post stories in the channel.
+
+        can_edit_stories (``bool``, *optional*):
+            Channels only.
+            True, if the administrator can edit stories in the channel.
+
+        can_delete_stories (``bool``, *optional*):
+            Channels only.
+            True, if the administrator can delete stories in the channel.
+
         is_anonymous (``bool``, *optional*):
             True, if the user's presence in the chat is hidden.
+
+        can_manage_direct_messages (``bool``, *optional*):
+            True, if the administrator can manage direct messages sent to the chat.
     """
 
     def __init__(
@@ -79,7 +99,12 @@ class ChatPrivileges(Object):
         can_edit_messages: bool = False,  # Channels only
         can_invite_users: bool = False,
         can_pin_messages: bool = False,  # Groups and supergroups only
-        is_anonymous: bool = False
+        can_manage_topics: bool = False, # supergroups only.
+        can_post_stories: bool = False, # Channels only
+        can_edit_stories: bool = False, # Channels only
+        can_delete_stories: bool = False, # Channels only
+        is_anonymous: bool = False,
+        can_manage_direct_messages: bool = False
     ):
         super().__init__(None)
 
@@ -93,7 +118,12 @@ class ChatPrivileges(Object):
         self.can_edit_messages: bool = can_edit_messages
         self.can_invite_users: bool = can_invite_users
         self.can_pin_messages: bool = can_pin_messages
+        self.can_manage_topics: bool = can_manage_topics
+        self.can_post_stories: bool = can_post_stories
+        self.can_edit_stories: bool = can_edit_stories
+        self.can_delete_stories: bool = can_delete_stories
         self.is_anonymous: bool = is_anonymous
+        self.can_manage_direct_messages: bool = can_manage_direct_messages
 
     @staticmethod
     def _parse(admin_rights: "raw.base.ChatAdminRights") -> "ChatPrivileges":
@@ -108,5 +138,10 @@ class ChatPrivileges(Object):
             can_edit_messages=admin_rights.edit_messages,
             can_invite_users=admin_rights.invite_users,
             can_pin_messages=admin_rights.pin_messages,
-            is_anonymous=admin_rights.anonymous
+            can_manage_topics=admin_rights.manage_topics,
+            can_post_stories=admin_rights.post_stories,
+            can_edit_stories=admin_rights.edit_stories,
+            can_delete_stories=admin_rights.delete_stories,
+            is_anonymous=admin_rights.anonymous,
+            can_manage_direct_messages=admin_rights.manage_direct_messages
         )

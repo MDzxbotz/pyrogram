@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
 from typing import Union, Dict
@@ -70,6 +71,9 @@ class ChatMember(Object):
 
         privileges (:obj:`~pyrogram.types.ChatPrivileges`, *optional*):
             Administrators only. Privileged actions that an administrator is able to take.
+
+        subscription_until_date (:py:obj:`~datetime.datetime`, *optional*):
+            Channel members only. Date when the subscription will expire.
     """
 
     def __init__(
@@ -88,7 +92,8 @@ class ChatMember(Object):
         is_member: bool = None,
         can_be_edited: bool = None,
         permissions: "types.ChatPermissions" = None,
-        privileges: "types.ChatPrivileges" = None
+        privileges: "types.ChatPrivileges" = None,
+        subscription_until_date: datetime = None
     ):
         super().__init__(client)
 
@@ -105,6 +110,7 @@ class ChatMember(Object):
         self.can_be_edited = can_be_edited
         self.permissions = permissions
         self.privileges = privileges
+        self.subscription_until_date = subscription_until_date
 
     @staticmethod
     def _parse(
@@ -143,6 +149,7 @@ class ChatMember(Object):
                 status=enums.ChatMemberStatus.MEMBER,
                 user=types.User._parse(client, users[member.user_id]),
                 joined_date=utils.timestamp_to_datetime(member.date),
+                subscription_until_date=utils.timestamp_to_datetime(member.subscription_until_date),
                 client=client
             )
         elif isinstance(member, raw.types.ChannelParticipantAdmin):
@@ -223,5 +230,6 @@ class ChatMember(Object):
                 user=types.User._parse(client, users[member.user_id]),
                 joined_date=utils.timestamp_to_datetime(member.date),
                 invited_by=types.User._parse(client, users[member.inviter_id]),
+                subscription_until_date=utils.timestamp_to_datetime(member.subscription_until_date),
                 client=client
             )

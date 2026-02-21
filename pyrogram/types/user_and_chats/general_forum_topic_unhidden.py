@@ -1,5 +1,4 @@
 #  Pyrofork - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
 #  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrofork.
@@ -17,28 +16,14 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
-
-from pyrogram import raw, utils
 from ..object import Object
 
 
-class VideoChatScheduled(Object):
-    """A service message about a voice chat scheduled in the chat.
+class GeneralTopicUnhidden(Object):
+    """A service message about a general topic unhidden in the chat.
 
-    Parameters:
-        start_date (:py:obj:`~datetime.datetime`):
-            Point in time when the voice chat is supposed to be started by a chat administrator.
+    Currently holds no information.
     """
 
-    def __init__(
-        self, *,
-        start_date: datetime
-    ):
+    def __init__(self):
         super().__init__()
-
-        self.start_date = start_date
-
-    @staticmethod
-    def _parse(action: "raw.types.MessageActionGroupCallScheduled") -> "VideoChatScheduled":
-        return VideoChatScheduled(start_date=utils.timestamp_to_datetime(action.schedule_date))

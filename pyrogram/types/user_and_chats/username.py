@@ -1,5 +1,4 @@
 #  Pyrofork - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
 #  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrofork.
@@ -17,28 +16,43 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
-
-from pyrogram import raw, utils
+from pyrogram import raw
 from ..object import Object
 
 
-class VideoChatScheduled(Object):
-    """A service message about a voice chat scheduled in the chat.
+class Username(Object):
+    """A Username.
+
 
     Parameters:
-        start_date (:py:obj:`~datetime.datetime`):
-            Point in time when the voice chat is supposed to be started by a chat administrator.
+        username (``String``):
+            The channel/user username.
+
+        editable (``bool``, *optional*):
+            Can the username edited.
+
+        active (``bool``, *optional*)
+            Is the username active.
     """
 
     def __init__(
         self, *,
-        start_date: datetime
+        username: str,
+        editable: bool = None,
+        active: bool = None
     ):
         super().__init__()
 
-        self.start_date = start_date
+        self.username = username
+        self.editable = editable
+        self.active = active
 
     @staticmethod
-    def _parse(action: "raw.types.MessageActionGroupCallScheduled") -> "VideoChatScheduled":
-        return VideoChatScheduled(start_date=utils.timestamp_to_datetime(action.schedule_date))
+    def _parse(action: "raw.types.Username") -> "Username":
+
+
+        return Username(
+            username=getattr(action,"username", None),
+            editable=getattr(action,"editable", None),
+            active=getattr(action,"active", None)
+        )

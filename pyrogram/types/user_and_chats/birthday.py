@@ -1,5 +1,4 @@
 #  Pyrofork - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
 #  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrofork.
@@ -17,28 +16,48 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
-
-from pyrogram import raw, utils
+from pyrogram import raw
 from ..object import Object
 
 
-class VideoChatScheduled(Object):
-    """A service message about a voice chat scheduled in the chat.
+class Birthday(Object):
+    """User Date of birth.
 
     Parameters:
-        start_date (:py:obj:`~datetime.datetime`):
-            Point in time when the voice chat is supposed to be started by a chat administrator.
+        day (``int``):
+            Day of birth.
+
+        month (``int``):
+            Month of birth.
+
+        year (``int``):
+            Year of birth.
     """
 
     def __init__(
-        self, *,
-        start_date: datetime
+        self,
+        *,
+        day: int,
+        month: int,
+        year: int
     ):
-        super().__init__()
-
-        self.start_date = start_date
+        self.day = day
+        self.month = month
+        self.year = year
 
     @staticmethod
-    def _parse(action: "raw.types.MessageActionGroupCallScheduled") -> "VideoChatScheduled":
-        return VideoChatScheduled(start_date=utils.timestamp_to_datetime(action.schedule_date))
+    def _parse(birthday: "raw.types.Birthday" = None) -> "Birthday":
+        if not birthday:
+            return
+        return Birthday(
+            day=birthday.day,
+            month=birthday.month,
+            year=birthday.year
+        )
+
+    async def write(self) -> "raw.types.Birthday":
+        return raw.types.Birthday(
+            day=self.day,
+            month=self.month,
+            year=self.year
+        )

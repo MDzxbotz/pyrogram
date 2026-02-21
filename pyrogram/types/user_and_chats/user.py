@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 import html
 from datetime import datetime
@@ -78,6 +79,9 @@ class User(Object, Update):
         is_deleted(``bool``, *optional*):
             True, if this user is deleted.
 
+        is_frozen(``bool``, *optional*):
+            True, if this user is frozen.
+
         is_bot (``bool``, *optional*):
             True, if this user is a bot.
 
@@ -100,6 +104,12 @@ class User(Object, Update):
         is_premium (``bool``, *optional*):
             True, if this user is a premium user.
 
+        is_contacts_only (``bool``, *optional*):
+            True, if this user is only allow incoming message from users in their contacts/premium users.
+
+        is_bot_business (``bool``, *optional*):
+            True, if this bot can connect to business account.
+
         first_name (``str``, *optional*):
             User's or bot's first name.
 
@@ -117,6 +127,10 @@ class User(Object, Update):
 
         username (``str``, *optional*):
             User's or bot's username.
+
+        usernames (List of :obj:`~pyrogram.types.Username`, *optional*):
+            List of all chat (fragment) usernames; for private chats, supergroups and channels.
+            Returned only in :meth:`~pyrogram.Client.get_chat`.
 
         language_code (``str``, *optional*):
             IETF language tag of the user's language.
@@ -140,11 +154,27 @@ class User(Object, Update):
             The list of reasons why this bot might be unavailable to some users.
             This field is available only in case *is_restricted* is True.
 
+        full_name (``str``, *optional*):
+            User's or bot's full name.
+
         mention (``str``, *property*):
             Generate a text mention for this user.
             You can use ``user.mention()`` to mention the user using their first name (styled using html), or
             ``user.mention("another name")`` for a custom name. To choose a different style
             ("html" or "md"/"markdown") use ``user.mention(style="md")``.
+
+        reply_color (:obj:`~pyrogram.types.ChatColor`, *optional*)
+            Chat reply color.
+
+        profile_color (:obj:`~pyrogram.types.ChatColor`, *optional*)
+            Chat profile color.
+
+        active_users (``int``, *optional*):
+            Bot's active users count.
+
+        frozen_icon (``int``, *optional*):
+            Frozen account icon.
+            This field is available only in case *is_frozen* is True.
     """
 
     def __init__(
@@ -156,6 +186,7 @@ class User(Object, Update):
         is_contact: bool = None,
         is_mutual_contact: bool = None,
         is_deleted: bool = None,
+        is_frozen: bool = None,
         is_bot: bool = None,
         is_verified: bool = None,
         is_restricted: bool = None,
@@ -163,18 +194,25 @@ class User(Object, Update):
         is_fake: bool = None,
         is_support: bool = None,
         is_premium: bool = None,
+        is_contacts_only: bool = None,
+        is_bot_business: bool = None,
         first_name: str = None,
         last_name: str = None,
         status: "enums.UserStatus" = None,
         last_online_date: datetime = None,
         next_offline_date: datetime = None,
         username: str = None,
+        usernames: List["types.Username"] = None,
         language_code: str = None,
         emoji_status: Optional["types.EmojiStatus"] = None,
         dc_id: int = None,
         phone_number: str = None,
         photo: "types.ChatPhoto" = None,
-        restrictions: List["types.Restriction"] = None
+        restrictions: List["types.Restriction"] = None,
+        reply_color: "types.ChatColor" = None,
+        profile_color: "types.ChatColor" = None,
+        active_users: int = None,
+        frozen_icon: int = None
     ):
         super().__init__(client)
 
@@ -183,6 +221,7 @@ class User(Object, Update):
         self.is_contact = is_contact
         self.is_mutual_contact = is_mutual_contact
         self.is_deleted = is_deleted
+        self.is_frozen = is_frozen
         self.is_bot = is_bot
         self.is_verified = is_verified
         self.is_restricted = is_restricted
@@ -190,18 +229,29 @@ class User(Object, Update):
         self.is_fake = is_fake
         self.is_support = is_support
         self.is_premium = is_premium
+        self.is_contacts_only = is_contacts_only
+        self.is_bot_business = is_bot_business
         self.first_name = first_name
         self.last_name = last_name
         self.status = status
         self.last_online_date = last_online_date
         self.next_offline_date = next_offline_date
         self.username = username
+        self.usernames = usernames
         self.language_code = language_code
         self.emoji_status = emoji_status
         self.dc_id = dc_id
         self.phone_number = phone_number
         self.photo = photo
         self.restrictions = restrictions
+        self.reply_color = reply_color
+        self.profile_color = profile_color
+        self.active_users = active_users
+        self.frozen_icon = frozen_icon
+
+    @property
+    def full_name(self) -> str:
+        return " ".join(filter(None, [self.first_name, self.last_name])) or None
 
     @property
     def mention(self):
@@ -215,6 +265,22 @@ class User(Object, Update):
     def _parse(client, user: "raw.base.User") -> Optional["User"]:
         if user is None or isinstance(user, raw.types.UserEmpty):
             return None
+        user_name = user.username
+        active_usernames = getattr(user, "usernames", [])
+        active_users = getattr(user, "bot_active_users", None)
+        usernames = None
+        if len(active_usernames) >= 1:
+            usernames = []
+            for username in active_usernames:
+                if username.editable:
+                    user_name = username.username
+                else:
+                    usernames.append(types.Username._parse(username))
+        if user_name is None and usernames is not None and len(usernames) > 0:
+            user_name = usernames[0].username
+            usernames.pop(0)
+        
+        frozen_icon = getattr(user, "bot_verification_icon", None)
 
         return User(
             id=user.id,
@@ -222,6 +288,7 @@ class User(Object, Update):
             is_contact=user.contact,
             is_mutual_contact=user.mutual_contact,
             is_deleted=user.deleted,
+            is_frozen=True if frozen_icon else False,
             is_bot=user.bot,
             is_verified=user.verified,
             is_restricted=user.restricted,
@@ -229,16 +296,23 @@ class User(Object, Update):
             is_fake=user.fake,
             is_support=user.support,
             is_premium=user.premium,
+            is_contacts_only=user.contact_require_premium,
+            is_bot_business=user.bot_business,
             first_name=user.first_name,
             last_name=user.last_name,
             **User._parse_status(user.status, user.bot),
-            username=user.username,
+            username=user_name,
+            usernames=usernames,
             language_code=user.lang_code,
             emoji_status=types.EmojiStatus._parse(client, user.emoji_status),
             dc_id=getattr(user.photo, "dc_id", None),
             phone_number=user.phone,
             photo=types.ChatPhoto._parse(client, user.photo, user.id, user.access_hash),
             restrictions=types.List([types.Restriction._parse(r) for r in user.restriction_reason]) or None,
+            reply_color=types.ChatColor._parse(getattr(user, "color", None)),
+            profile_color=types.ChatColor._parse_profile_color(getattr(user, "profile_color", None)),
+            active_users=active_users,
+            frozen_icon=frozen_icon,
             client=client
         )
 
@@ -282,6 +356,92 @@ class User(Object, Update):
             **User._parse_status(user_status.status),
             client=client
         )
+
+    def listen(self, *args, **kwargs):
+        """Bound method *listen* of :obj:`~pyrogram.types.User`.
+
+        Use as a shortcut for:
+
+        .. code-block:: python
+
+            client.wait_for_message(user_id)
+
+        Parameters:
+            args (*optional*):
+                The arguments to pass to the :meth:`~pyrogram.Client.listen` method.
+
+            kwargs (*optional*):
+                The keyword arguments to pass to the :meth:`~pyrogram.Client.listen` method.
+
+        Example:
+            .. code-block:: python
+
+                user.listen()
+
+        Returns:
+            :obj:`~pyrogram.types.Message`: On success, the reply message is returned.
+        Raises:
+            RPCError: In case of a Telegram RPC error.
+            asyncio.TimeoutError: In case reply not received within the timeout.
+        """
+        return self._client.listen(*args, user_id=self.id, **kwargs)
+
+    def ask(self, text, *args, **kwargs):
+        """Bound method *ask* of :obj:`~pyrogram.types.User`.
+        
+        Use as a shortcut for:
+
+        .. code-block:: python
+
+            client.send_message(user_id, "What is your name?")
+
+            client.wait_for_message(user_id)
+
+        Parameters:
+            text (``str``):
+                Text of the message to be sent.
+
+            args:
+                The arguments to pass to the :meth:`~pyrogram.Client.listen` method.
+
+            kwargs:
+                The keyword arguments to pass to the :meth:`~pyrogram.Client.listen` method.
+
+        Example:
+            .. code-block:: python
+
+                user.ask("What is your name?")
+
+        Returns:
+            :obj:`~pyrogram.types.Message`: On success, the reply message is returned.
+        Raises:
+            RPCError: In case of a Telegram RPC error.
+            asyncio.TimeoutError: In case reply not received within the timeout.
+        """
+        return self._client.ask(self.id, text, *args, user_id=self.id, **kwargs)
+
+    def stop_listening(self, *args, **kwargs):
+        """Bound method *stop_listening* of :obj:`~pyrogram.types.User`.
+        
+        Use as a shortcut for:
+
+        .. code-block:: python
+
+            client.stop_listening(user_id=user_id)
+
+        Parameters:
+            args (*optional*):
+                The arguments to pass to the :meth:`~pyrogram.Client.listen` method.
+
+            kwargs (*optional*):
+                The keyword arguments to pass to the :meth:`~pyrogram.Client.listen` method.
+
+        Example:
+            .. code-block:: python
+
+                user.stop_listen()
+        """
+        return self._client.stop_listening(*args, user_id=self.id, **kwargs)
 
     async def archive(self):
         """Bound method *archive* of :obj:`~pyrogram.types.User`.
