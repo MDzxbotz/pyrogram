@@ -1,5 +1,4 @@
 #  Pyrofork - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
 #  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrofork.
@@ -17,32 +16,29 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-import pyrogram
+
+from typing import List
+
 from pyrogram import raw
 from ..object import Object
 
 
-class Dice(Object):
-    """A dice with a random value from 1 to 6 for currently supported base emoji.
+class TodoTasksIncompleted(Object):
+    """One or more todo task/s has been flag as incomplete.
 
     Parameters:
-        emoji (``string``):
-            Emoji on which the dice throw animation is based.
-
-        value (``int``):
-            Value of the dice, 1-6 for currently supported base emoji.
+        ids (List of ``int``):
+            List of Unique identifier of the todo tasks.
     """
 
-    def __init__(self, *, client: "pyrogram.Client" = None, emoji: str, value: int):
-        super().__init__(client)
+    def __init__(self, ids: List[int]):
+        super().__init__()
 
-        self.emoji = emoji
-        self.value = value
+        self.ids = ids
 
     @staticmethod
-    def _parse(client, dice: "raw.types.MessageMediaDice") -> "Dice":
-        return Dice(
-            emoji=dice.emoticon,
-            value=dice.value,
-            client=client
+    def _parse(todo_completion: "raw.types.TodoCompletion") -> "TodoTasksIncompleted":
+        ids = [id for id in todo_completion.incompleted]
+        return TodoTasksIncompleted(
+            ids=ids,
         )

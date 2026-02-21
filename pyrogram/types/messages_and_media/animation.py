@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
 from typing import List
@@ -22,7 +23,7 @@ from typing import List
 import pyrogram
 from pyrogram import raw, utils
 from pyrogram import types
-from pyrogram.file_id import FileId, FileType, FileUniqueId, FileUniqueType
+from pyrogram.file_id import FileId, FileType, FileUniqueId, FileUniqueType, ThumbnailSource
 from ..object import Object
 
 
@@ -43,7 +44,7 @@ class Animation(Object):
         height (``int``):
             Animation height as defined by sender.
 
-        duration (``int``):
+        duration (``int``, *optional*):
             Duration of the animation in seconds as defined by sender.
 
         file_name (``str``, *optional*):
@@ -70,7 +71,7 @@ class Animation(Object):
         file_unique_id: str,
         width: int,
         height: int,
-        duration: int,
+        duration: int = None,
         file_name: str = None,
         mime_type: str = None,
         file_size: int = None,
@@ -119,3 +120,44 @@ class Animation(Object):
             thumbs=types.Thumbnail._parse(client, animation),
             client=client
         )
+
+    @staticmethod
+    def _parse_chat_animation(
+        client,
+        video: "raw.types.Photo"
+    ) -> "Animation":
+        if isinstance(video, raw.types.Photo):
+            if not video.video_sizes:
+                return
+            video_sizes: List[raw.types.VideoSize] = []
+            for p in video.video_sizes:
+                if isinstance(p, raw.types.VideoSize):
+                    video_sizes.append(p)
+                # TODO: VideoSizeEmojiMarkup
+            video_sizes.sort(key=lambda p: p.size)
+            video_size = video_sizes[-1]
+            return Animation(
+                file_id=FileId(
+                    file_type=FileType.PHOTO,
+                    dc_id=video.dc_id,
+                    media_id=video.id,
+                    access_hash=video.access_hash,
+                    file_reference=video.file_reference,
+                    thumbnail_source=ThumbnailSource.THUMBNAIL,
+                    thumbnail_file_type=FileType.PHOTO,
+                    thumbnail_size=video_size.type,
+                    volume_id=0,
+                    local_id=0
+                ).encode() if video else None,
+                file_unique_id=FileUniqueId(
+                    file_unique_type=FileUniqueType.DOCUMENT,
+                    media_id=video.id
+                ).encode() if video else None,
+                width=video_size.w,
+                height=video_size.h,
+                file_size=video_size.size,
+                date=utils.timestamp_to_datetime(video.date) if video else None,
+                file_name=f"chat_video_{video.date}_{client.rnd_id()}.mp4",
+                mime_type="video/mp4",
+                client=client
+            )

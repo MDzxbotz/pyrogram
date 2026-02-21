@@ -1,5 +1,4 @@
 #  Pyrofork - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
 #  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrofork.
@@ -17,32 +16,14 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-import pyrogram
-from pyrogram import raw
 from ..object import Object
 
 
-class Dice(Object):
-    """A dice with a random value from 1 to 6 for currently supported base emoji.
+class ContactRegistered(Object):
+    """A service message about a contact registered.
 
-    Parameters:
-        emoji (``string``):
-            Emoji on which the dice throw animation is based.
-
-        value (``int``):
-            Value of the dice, 1-6 for currently supported base emoji.
+    Currently holds no information.
     """
 
-    def __init__(self, *, client: "pyrogram.Client" = None, emoji: str, value: int):
-        super().__init__(client)
-
-        self.emoji = emoji
-        self.value = value
-
-    @staticmethod
-    def _parse(client, dice: "raw.types.MessageMediaDice") -> "Dice":
-        return Dice(
-            emoji=dice.emoticon,
-            value=dice.value,
-            client=client
-        )
+    def __init__(self):
+        super().__init__()

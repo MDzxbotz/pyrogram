@@ -17,32 +17,37 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-import pyrogram
 from pyrogram import raw
 from ..object import Object
 
 
-class Dice(Object):
-    """A dice with a random value from 1 to 6 for currently supported base emoji.
+class WebPageEmpty(Object):
+    # TODO: hash, cached_page
+    """A webpage preview
 
     Parameters:
-        emoji (``string``):
-            Emoji on which the dice throw animation is based.
+        id (``str``):
+            Unique identifier for this webpage.
 
-        value (``int``):
-            Value of the dice, 1-6 for currently supported base emoji.
+        url (``str``):
+            Full URL for this webpage.
     """
 
-    def __init__(self, *, client: "pyrogram.Client" = None, emoji: str, value: int):
-        super().__init__(client)
+    def __init__(
+        self,
+        *,
+        id: str,
+        url: str
+    ):
+        super().__init__()
 
-        self.emoji = emoji
-        self.value = value
+        self.id = id
+        self.url = url
 
     @staticmethod
-    def _parse(client, dice: "raw.types.MessageMediaDice") -> "Dice":
-        return Dice(
-            emoji=dice.emoticon,
-            value=dice.value,
-            client=client
+    def _parse(webpage: "raw.types.WebPageEmpty") -> "WebPageEmpty":
+
+        return WebPageEmpty(
+            id=str(webpage.id),
+            url=webpage.url
         )

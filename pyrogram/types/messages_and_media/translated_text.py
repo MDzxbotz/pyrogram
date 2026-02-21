@@ -17,32 +17,45 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-import pyrogram
-from pyrogram import raw
+from typing import List
+
+from pyrogram import raw, types
+
 from ..object import Object
+from .message import Str
 
 
-class Dice(Object):
-    """A dice with a random value from 1 to 6 for currently supported base emoji.
+class TranslatedText(Object):
+    """A translated text with entities.
 
     Parameters:
-        emoji (``string``):
-            Emoji on which the dice throw animation is based.
+        text (``str``):
+            Translated text.
 
-        value (``int``):
-            Value of the dice, 1-6 for currently supported base emoji.
+        entities (``str``, *optional*):
+            Entities of the text.
     """
 
-    def __init__(self, *, client: "pyrogram.Client" = None, emoji: str, value: int):
-        super().__init__(client)
-
-        self.emoji = emoji
-        self.value = value
+    def __init__(
+        self,
+        *,
+        text: str,
+        entities: List["types.MessageEntity"] = None
+    ):
+        self.text = text
+        self.entities = entities
 
     @staticmethod
-    def _parse(client, dice: "raw.types.MessageMediaDice") -> "Dice":
-        return Dice(
-            emoji=dice.emoticon,
-            value=dice.value,
-            client=client
+    def _parse(
+        client,
+        translate_result: "raw.types.TextWithEntities"
+    ) -> "TranslatedText":
+        entities = [
+            types.MessageEntity._parse(client, entity, {})
+            for entity in translate_result.entities
+        ]
+        entities = types.List(filter(lambda x: x is not None, entities))
+
+        return TranslatedText(
+            text=Str(translate_result.text).init(entities) or None, entities=entities or None
         )
