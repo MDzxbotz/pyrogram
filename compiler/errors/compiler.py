@@ -38,14 +38,6 @@ def caml(s):
     s = snek(s).split("_")
     return "".join([str(i.title()) for i in s])
 
-def get_classes_from_file(file_path):
-    with open(file_path, "r", encoding="utf-8") as f:
-        tree = ast.parse(f.read())
-
-    classes = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
-    return classes
-
-
 def start():
     shutil.rmtree(DEST, ignore_errors=True)
     os.makedirs(DEST)
@@ -135,20 +127,6 @@ def start():
             f_all.write("    },\n")
 
         f_all.write("}\n")
-        with open(init, "a", encoding="utf-8") as f_init:
-            f_init.write("\n")
-            all_classes = []
-            for i in files:
-                code, name = re.search(r"(\d+)_([A-Z_]+)", i).groups()
-                classes = get_classes_from_file("{}/{}_{}.py".format(DEST, name.lower(), code))
-                for j in classes:
-                    if j not in ["BaseException", "Exception", "PyrogramException"]:
-                        all_classes.append(j)
-            f_init.write("__all__ = [\n")
-            all_classes = sorted(set(all_classes))
-            for i in all_classes:
-                f_init.write("    \"{}\",\n".format(i))
-            f_init.write("]\n")
 
     with open("{}/all.py".format(DEST), encoding="utf-8") as f:
         content = f.read()
