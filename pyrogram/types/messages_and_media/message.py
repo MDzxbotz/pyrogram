@@ -561,6 +561,7 @@ class Message(Object, Update):
         ] = None,
         reactions: List["types.Reaction"] = None,
         chat_join_type: "enums.ChatJoinType" = None,
+        raw: "raw.types.Message" = None # dummy
     ):
         super().__init__(client)
 
