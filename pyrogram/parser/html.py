@@ -61,7 +61,7 @@ class Parser(HTMLParser):
             entity = raw.types.MessageEntityCode
         elif tag == "pre":
             entity = raw.types.MessageEntityPre
-            extra["language"] = attrs.get("language", "")
+            extra["language"] = utils.remove_surrogates(attrs.get("language", ""))
         elif tag == "spoiler":
             entity = raw.types.MessageEntitySpoiler
         elif tag == "a":
@@ -74,7 +74,7 @@ class Parser(HTMLParser):
                 extra["user_id"] = int(mention.group(1))
             else:
                 entity = raw.types.MessageEntityTextUrl
-                extra["url"] = url
+                extra["url"] = utils.remove_surrogates(url)
         elif tag == "emoji":
             entity = raw.types.MessageEntityCustomEmoji
             custom_emoji_id = int(attrs.get("id"))
