@@ -65,8 +65,8 @@ class FileStorage(SQLiteStorage):
         else:
            await self.update()
 
-        with self.conn:
-           await self.execute("VACUUM")
+        # with self.conn:
+        #    await self.execute("VACUUM")
 
     async def delete(self):
         os.remove(self.database)
