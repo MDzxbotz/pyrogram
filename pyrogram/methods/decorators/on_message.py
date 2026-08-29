@@ -25,7 +25,7 @@ from pyrogram.filters import Filter
 
 class OnMessage:
     def on_message(
-        self=None,
+        self: "ONMessage | Filter" = None,
         filters=None,
         group: int = 0
     ) -> Callable:
